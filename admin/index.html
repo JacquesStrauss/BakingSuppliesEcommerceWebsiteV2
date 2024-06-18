@@ -1,0 +1,41 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+    <header>
+        <h1>Admin Panel</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="addCategory.html">Add Category</a>
+            <a href="addProduct.html">Add Product</a>
+            <a href="editCategory.html">Edit Category</a>
+            <a href="editProduct.html">Edit Product</a>
+            <a href="editAbout.html">Edit About</a>            
+            <a href="#" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Manage Products</h2>
+        <div id="admin-products"></div>
+    </main>
+    <script src="../js/script.js"></script>
+</body>
+</html>
+<script>
+
+function logout() {
+            document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '../php/logout.php';
+        }
+
+
+</script>
+

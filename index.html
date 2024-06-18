@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My E-commerce Site</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <div id="page-container">
+        <div id="content-wrap">
+
+
+            <header>
+                <div class="logo">
+                    <img src="category_images\logo.png">
+                </div>
+
+                <nav id="navbar">
+                    <a href="index.html">Home</a>
+                    <a href="cart.html">Cart</a>
+                    <a href="about.html">About Us</a>
+                    <a id="loginTab" href="login.html">Login</a>
+                    <a id="signupTab" href="signup.html">Sign Up</a>
+                    <a id="logoutTab" href="#" onclick="logout()">Logout</a>
+                </nav>
+            </header>
+            <main>
+                <section class="hero">
+                    <h1>Welcome to SweetBake Supplies</h1>
+                    <br>
+                    <p>Your one-stop shop for all your baking needs!</p>
+            
+                </section>
+                <h2>Categories</h2>
+                <section id="featured-categories" class="featured-categories">
+
+
+                </section>
+            </main>
+        </div>
+
+        <footer>
+
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Pages</h3>
+                    <ul>
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+
+                            <a href="cart.html">Cart</a>
+                        </li>
+                        <li>
+
+                            <a href="about.html">About Us</a>
+                        </li>
+                    </ul>
+
+
+                </div>
+                <div class="footer-section">
+                    <h3></h3>
+                </div>
+                <div class="footer-section">
+                    <h3></h3>
+                </div>
+                <div class="footer-section">
+                    <h3></h3>
+                </div>
+            </div>
+
+            <p>&copy; 2024 SweetBake Supplies. All rights reserved.</p>
+        </footer>
+    </div>
+    <script src="js/script.js"></script>
+    <script>
+        // Function to handle page initialization
+        function initializePage() {
+            const isLoggedIn = document.cookie.includes('isLoggedIn=true');
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const logoutTab = document.getElementById('logoutTab');
+
+            if (isLoggedIn) {
+                loginTab.style.display = 'none';
+                signupTab.style.display = 'none';
+            } else {
+                logoutTab.style.display = 'none';
+            }
+        }
+
+        // Function to handle logout
+        function logout() {
+            document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = 'php/logout.php';
+        }
+
+        // Function to fetch and display categories
+        async function fetchCategories() {
+            try {
+                const response = await fetch('php/getCategories.php');
+                const categories = await response.json();
+                displayCategories(categories);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        }
+
+        // Function to display categories
+        function displayCategories(categories) {
+
+
+            const featuredCategoriesContainer = document.getElementById('featured-categories');
+            featuredCategoriesContainer.innerHTML = ''
+
+            const categoriesContainer = document.createElement('div');
+            categoriesContainer.classList.add('categories');
+
+
+
+            categories.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.classList.add('category');
+
+                const categoryImage = document.createElement('img');
+
+                const categoryOverlayElement = document.createElement('div');
+                categoryOverlayElement.classList.add('category-overlay');
+
+                categoryImage.src = "category_images/" + category.category_url;
+
+                const categoryName = category.category_name;
+                const categorySpanElement = document.createElement('span');
+                categorySpanElement.classList.add('category-name');
+                categorySpanElement.textContent = categoryName;
+
+
+                categoryOverlayElement.appendChild(categorySpanElement);
+
+
+                categoryElement.appendChild(categoryImage);
+                categoryElement.appendChild(categoryOverlayElement);
+
+
+                categoryElement.onclick = () => {
+                    window.location.href = `category.html?category_id=${category.category_id}`;
+                };
+
+                categoriesContainer.appendChild(categoryElement);
+                featuredCategoriesContainer.appendChild(categoriesContainer);
+            }
+
+            );
+
+        }
+
+        // Main function to be executed when the page loads
+        async function main() {
+            initializePage();
+            await fetchCategories();
+        }
+
+        document.addEventListener('DOMContentLoaded', main);
+    </script>
+</body>
+
+</html>

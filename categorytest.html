@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Products</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <header>
+        <h1>Category Products</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="cart.html">Cart</a>
+            <a href="about.html">About Us</a>
+            <a id="loginTab" href="login.html">Login</a>
+            <a id="signupTab" href="signup.html">Sign Up</a>
+            <a id="logoutTab" href="#" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <div class="filters">
+            <h2>Refine by Category</h2>
+            <ul id="category-filters"></ul>
+        </div>
+        <div class="products-section">
+            <div class="sorting">
+                <label for="sort-options">Sort by:</label>
+                <select id="sort-options" onchange="sortProducts()">
+                    <option value="relevance">Relevance</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                </select>
+            </div>
+            <div id="products" class="product-grid"></div>
+        </div>
+    </main>
+    <footer>
+        <!-- Footer content -->
+    </footer>
+    <script src="js/script.js"></script>
+    <script>
+        function getCategoryName(categoryId) {
+            const categories = {
+                1: 'Baking Ingredients & Groceries',
+                2: 'Sugars, Sweeteners & Syrups',
+                3: 'Pre-mixes',
+                4: 'Toppings, Fillings & Frostings',
+                5: 'Chocolates',
+                6: 'Spices, Herbs & Sauces'
+            };
+            return categories[categoryId] || 'Category';
+        }
+
+        async function fetchCategories() {
+            try {
+                const response = await fetch('php/getCategories.php');
+                const categories = await response.json();
+                displayCategories(categories);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        }
+
+        function displayCategories(categories) {
+            const categoryFilters = document.getElementById('category-filters');
+            categoryFilters.innerHTML = '';
+
+            categories.sort((a, b) => a.name.localeCompare(b.name));
+
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                li.textContent = category.name;
+                li.onclick = () => {
+                    window.location.href = `category.html?category_id=${category.id}`;
+                };
+                categoryFilters.appendChild(li);
+            });
+        }
+
+        async function fetchCategoryProducts(categoryId, sort = 'relevance') {
+            try {
+                const response = await fetch(`php/getCategoryProducts.php?category_id=${categoryId}&sort=${sort}`);
+                const products = await response.json();
+                displayProducts(products);
+            } catch (error) {
+                console.error('Error fetching category products:', error);
+            }
+        }
+
+        function displayProducts(products) {
+            const productsContainer = document.getElementById('products');
+            productsContainer.innerHTML = '';
+
+            products.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.classList.add('product');
+
+                const productImage = document.createElement('img');
+                productImage.src = product.image_url;
+                productImage.alt = product.name;
+
+                const productDetails = document.createElement('div');
+                productDetails.classList.add('product-details');
+
+                const productName = document.createElement('h3');
+                productName.textContent = product.name;
+
+                const productDescription = document.createElement('p');
+                productDescription.textContent = product.description;
+
+                const productPrice = document.createElement('p');
+                productPrice.textContent = `$${parseFloat(product.price).toFixed(2)}`;
+
+                productDetails.appendChild(productName);
+                productDetails.appendChild(productDescription);
+                productDetails.appendChild(productPrice);
+
+                productElement.appendChild(productImage);
+                productElement.appendChild(productDetails);
+                productElement.onclick = () => {
+                    window.location.href = `productdetail.html?product_id=${product.id}`;
+                };
+                productsContainer.appendChild(productElement);
+            });
+        }
+
+        function sortProducts() {
+            const sortOption = document.getElementById('sort-options').value;
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryId = urlParams.get('category_id');
+            fetchCategoryProducts(categoryId, sortOption);
+        }
+
+        function initializePage() {
+            const isLoggedIn = document.cookie.includes('isLoggedIn=true');
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const logoutTab = document.getElementById('logoutTab');
+
+            if (isLoggedIn) {
+                loginTab.style.display = 'none';
+                signupTab.style.display = 'none';
+            } else {
+                logoutTab.style.display = 'none';
+            }
+        }
+
+        async function main() {
+            initializePage();
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryId = urlParams.get('category_id');
+            const categoryName = getCategoryName(categoryId);
+            document.getElementById('category-name').textContent = categoryName;
+            await fetchCategories();
+            await fetchCategoryProducts(categoryId);
+        }
+
+        document.addEventListener('DOMContentLoaded', main);
+    </script>
+</body>
+</html>

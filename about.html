@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <header>
+        <h1>About Us</h1>
+        <nav id="navbar">
+            <a href="index.html">Home</a>
+            <a href="cart.html">Cart</a>
+            <a id="loginTab" href="login.html">Login</a>
+            <a id="signupTab" href="signup.html">Sign Up</a>
+            <a id="logoutTab" href="#" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <section id="about-content">
+            <!-- Content will be loaded here -->
+        </section>
+    </main>
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('php/about.php');
+            const data = await response.json();
+            document.getElementById('about-content').innerHTML = data.content;
+        });
+    </script>
+</body>
+</html>

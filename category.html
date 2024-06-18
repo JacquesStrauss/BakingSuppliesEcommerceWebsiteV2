@@ -1,0 +1,485 @@
+<!--
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Products</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <div id="page-container">
+        <div id="content-wrap">
+
+
+            <header>
+                <div class="logo">
+                    <img src="category_images\logo.png">
+                </div>
+
+                <nav id="navbar">
+                    <a href="index.html">Home</a>
+                    <a href="cart.html">Cart</a>
+                    <a href="about.html">About Us</a>
+                    <a id="loginTab" href="login.html">Login</a>
+                    <a id="signupTab" href="signup.html">Sign Up</a>
+                    <a id="logoutTab" href="#" onclick="logout()">Logout</a>
+                </nav>
+            </header>
+            <main>
+                <div class="filters">
+                    <h2>Refine by Category</h2>
+                    <ul id="category-filters"></ul>
+                </div>
+                <div class="products-section">
+                    <h2 id="category-name"></h2>
+                    <div class="sorting">
+                        <label for="sort-options">Sort by:</label>
+                        <select id="sort-options" onchange="sortProducts()">
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="relevance">Relevance</option>
+                        </select>
+                    </div>
+
+
+                    <div id="products" class="product-grid"></div>
+                </div>
+                <section id="featured-products" class="featured-products">
+
+
+                </section>
+            </main>
+            <script>
+                function initializePage() {
+                    const isLoggedIn = document.cookie.includes('isLoggedIn=true');
+                    const loginTab = document.getElementById('loginTab');
+                    const signupTab = document.getElementById('signupTab');
+                    const logoutTab = document.getElementById('logoutTab');
+
+                    if (isLoggedIn) {
+                        loginTab.style.display = 'none';
+                        signupTab.style.display = 'none';
+                    } else {
+                        logoutTab.style.display = 'none';
+                    }
+                }
+
+                function logout() {
+                    document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    window.location.href = 'php/logout.php';
+                }
+
+                /*
+                                async function getCategoryName(categoryId) {
+                
+                
+                                    try {
+                                        const response = await fetch('php/getCategoriesFilters.php');
+                                        const categories = await response.json();
+                                        return categories[categoryId] || 'category';
+                                    } catch (error) {
+                                        console.error('Error fetching categories:', error);
+                                    }
+                
+                
+                                } */
+
+
+                function getCategoryName(categoryId) {
+                    try {
+                        const response = fetch('php/getCategoriesFilters.php');
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        const categories = response.json();
+                        console.log('Fetched categories:', categories); // Log the fetched categories
+                        return categories[categoryId] || 'category';
+                    } catch (error) {
+                        console.error('Error fetching categories:', error);
+                        return 'category'; // Default fallback category name
+                    }
+                }
+
+
+                function fetchCategories() {
+                    try {
+                        const response = fetch('php/getCategoriesFilters.php');
+                        const categories = response.json();
+                        displayCategories(categories);
+                    } catch (error) {
+                        console.error('Error fetching categories:', error);
+                    }
+                }
+
+                function displayCategories(categories) {
+                    const categoryFilters = document.getElementById('category-filters');
+                    categoryFilters.innerHTML = '';
+
+                    categories.sort((a, b) => a.category_name.local(b.category_name));
+
+                    categories.forEach(category => {
+                        const li = document.createElement('li');
+                        li.textContent = category.category_name;
+                        li.onclick = () => {
+                            window.location.href = `category.html?category_id=${category.id}`;
+                        };
+                        categoryFilters.appendChild(li);
+                    });
+                }
+
+                function fetchCategoryProducts(categoryId, sort = 'price-asc') {
+                    try {
+                        const response = fetch(`php/getCategoryProductsFilter.php?category_id=${categoryId}&sort=${sort}`);
+                        const products = response.json();
+                        displayProducts(products);
+                    } catch (error) {
+                        console.error('Error fetching category products:', error);
+                    }
+                }
+
+                // Function to display categories
+                function displayProducts(products) {
+
+                    /*
+                    const featuredProductsContainer = document.getElementById('featured-products');
+                    featuredProductsContainer.innerHTML = ''
+
+                    const productsContainer = document.createElement('div');
+                    productsContainer.classList.add('products');
+
+
+
+                    products.forEach(product => {
+                        const productElement = document.createElement('div');
+                        productElement.classList.add('product');
+
+                        const productImage = document.createElement('img');
+                        /*
+                        const productOverlayElement = document.createElement('div');
+                        productOverlayElement.classList.add('product-overlay');
+                        
+                        productImage.alt = "none"
+                        productImage.src = "product_images/" + product.image_url;
+
+                        const productName = document.createElement('p');;
+                        const productSpanElement = document.createElement('span');
+                        productSpanElement.classList.add('product-name');
+                        productSpanElement.textContent = productName;
+
+                        const productDescription = document.createElement('p');
+                        productDescription.textContent = product.description;
+
+                        const productPrice = document.createElement('p');
+                        productPrice.textContent = `R${parseFloat(product.price).toFixed(2)}`;
+
+
+
+
+                        // productOverlayElement.appendChild(productSpanElement);
+
+
+                        productElement.appendChild(productImage);
+                        //productElement.appendChild(productOverlayElement);
+                        productElement.appendChild(productName);
+                        productElement.appendChild(productDescription);
+                        productElement.appendChild(productPrice);
+
+                        productElement.onclick = () => {
+                            window.location.href = `productdetail.html?product_id=${product.id}`;
+                        };
+
+                        productsContainer.appendChild(productElement);
+                        featuredProductsContainer.appendChild(productsContainer);
+                    }
+
+                    );
+*/
+
+                    const productsContainer = document.getElementById('products');
+                    productsContainer.innerHTML = '';
+
+                    products.forEach(product => {
+                        const productElement = document.createElement('div');
+                        productElement.classList.add('product');
+
+                        const productImage = document.createElement('img');
+                        productImage.src = product.image_url;
+                        productImage.alt = product.name;
+
+                        const productDetails = document.createElement('div');
+                        productDetails.classList.add('product-details');
+
+                        const productName = document.createElement('h3');
+                        productName.textContent = product.name;
+
+                        const productDescription = document.createElement('p');
+                        productDescription.textContent = product.description;
+
+                        const productPrice = document.createElement('p');
+                        productPrice.textContent = `$${parseFloat(product.price).toFixed(2)}`;
+
+                        productDetails.appendChild(productName);
+                        productDetails.appendChild(productDescription);
+                        productDetails.appendChild(productPrice);
+
+                        productElement.appendChild(productImage);
+                        productElement.appendChild(productDetails);
+                        productElement.onclick = () => {
+                            window.location.href = `productdetail.html?product_id=${product.id}`;
+                        };
+                        productsContainer.appendChild(productElement);
+                    });
+
+
+                }
+
+
+                function sortProducts() {
+                    const sortOption = document.getElementById('sort-options').value;
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const categoryId = urlParams.get('category_id');
+                    fetchCategoryProducts(categoryId, sortOption);
+                }
+
+
+
+                /*
+                                function displayProducts(products) {
+                                    const productsContainer = document.getElementById('products');
+                                    productsContainer.innerHTML = '';
+                
+                                    products.forEach(product => {
+                                        const productElement = document.createElement('div');
+                                        productElement.classList.add('product');
+                
+                                        const productImage = document.createElement('img');
+                                        productImage.src = product.image_url;
+                                        productImage.alt = product.name;
+                
+                                        const productName = document.createElement('h3');
+                                        productName.textContent = product.name;
+                
+                                        const productDescription = document.createElement('p');
+                                        productDescription.textContent = product.description;
+                
+                                        const productPrice = document.createElement('p');
+                                        productPrice.textContent = `$${parseFloat(product.price).toFixed(2)}`;
+                
+                                        productElement.appendChild(productImage);
+                                        productElement.appendChild(productName);
+                                        productElement.appendChild(productDescription);
+                                        productElement.appendChild(productPrice);
+                                        productElement.onclick = () => {
+                                            window.location.href = `productdetail.html?product_id=${product.id}`;
+                                        };
+                                        productsContainer.appendChild(productElement);
+                                    });
+                                }
+                */
+                function getCategoryIdFromUrl() {
+                    const params = new URLSearchParams(window.location.search);
+                    return params.get('category_id');
+                }
+
+                async function main() {
+                    initializePage();
+                    const categoryId = getCategoryIdFromUrl();
+                    const categoryName = getCategoryName(categoryId);
+                    document.getElementById('category-name').textContent = categoryName;
+                    await fetchCategories();
+                    await fetchCategoryProducts(categoryId);
+                }
+
+                document.addEventListener('DOMContentLoaded', main);
+            </script>
+</body>
+
+</html>
+
+-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Products</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <div id="page-container">
+        <div id="content-wrap">
+
+
+            <header>
+                <div class="logo">
+                    <img src="category_images\logo.png">
+                </div>
+
+                <nav id="navbar">
+                    <a href="index.html">Home</a>
+                    <a href="cart.html">Cart</a>
+                    <a href="about.html">About Us</a>
+                    <a id="loginTab" href="login.html">Login</a>
+                    <a id="signupTab" href="signup.html">Sign Up</a>
+                    <a id="logoutTab" href="#" onclick="logout()">Logout</a>
+                </nav>
+            </header>
+            <main>
+
+                <h2>Products</h2>
+                <section id="featured-products" class="featured-products">
+
+
+                </section>
+
+            </main>
+            <script>
+                function initializePage() {
+                    const isLoggedIn = document.cookie.includes('isLoggedIn=true');
+                    const loginTab = document.getElementById('loginTab');
+                    const signupTab = document.getElementById('signupTab');
+                    const logoutTab = document.getElementById('logoutTab');
+
+                    if (isLoggedIn) {
+                        loginTab.style.display = 'none';
+                        signupTab.style.display = 'none';
+                    } else {
+                        logoutTab.style.display = 'none';
+                    }
+                }
+
+                function logout() {
+                    document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    window.location.href = 'php/logout.php';
+                }
+
+                async function fetchCategoryProducts(categoryId) {
+                    try {
+                        const response = await fetch(`php/getCategoryProducts.php?category_id=${categoryId}`);
+                        const products = await response.json();
+                        displayProducts(products);
+                    } catch (error) {
+                        console.error('Error fetching category products:', error);
+                    }
+                }
+
+
+                // Function to display categories
+                function displayProducts(products) {
+
+
+                    const featuredProductsContainer = document.getElementById('featured-products');
+                    featuredProductsContainer.innerHTML = ''
+
+                    const productsContainer = document.createElement('div');
+                    productsContainer.classList.add('products');
+
+
+
+                    products.forEach(product => {
+                        const productElement = document.createElement('div');
+                        productElement.classList.add('product');
+
+                        const productImage = document.createElement('img');
+                        /*
+                                                const productOverlayElement = document.createElement('div');
+                                                productOverlayElement.classList.add('product-overlay');*/
+                        productImage.alt = "none"
+                        productImage.src = "product_images/" + product.image_url;
+
+                        const productName = document.createElement('p');;
+                        const productSpanElement = document.createElement('span');
+                        productSpanElement.classList.add('product-name');
+                        productSpanElement.textContent = productName;
+
+                        const productDescription = document.createElement('p');
+                        productDescription.textContent = product.description;
+
+                        const productPrice = document.createElement('p');
+                        productPrice.textContent = `R${parseFloat(product.price).toFixed(2)}`;
+
+
+
+
+                        // productOverlayElement.appendChild(productSpanElement);
+
+
+                        productElement.appendChild(productImage);
+                        //productElement.appendChild(productOverlayElement);
+                        productElement.appendChild(productName);
+                        productElement.appendChild(productDescription);
+                        productElement.appendChild(productPrice);
+
+                        productElement.onclick = () => {
+                            window.location.href = `productdetail.html?product_id=${product.id}`;
+                        };
+
+                        productsContainer.appendChild(productElement);
+                        featuredProductsContainer.appendChild(productsContainer);
+                    }
+
+                    );
+
+                }
+
+
+
+                /*
+                                function displayProducts(products) {
+                                    const productsContainer = document.getElementById('products');
+                                    productsContainer.innerHTML = '';
+                
+                                    products.forEach(product => {
+                                        const productElement = document.createElement('div');
+                                        productElement.classList.add('product');
+                
+                                        const productImage = document.createElement('img');
+                                        productImage.src = product.image_url;
+                                        productImage.alt = product.name;
+                
+                                        const productName = document.createElement('h3');
+                                        productName.textContent = product.name;
+                
+                                        const productDescription = document.createElement('p');
+                                        productDescription.textContent = product.description;
+                
+                                        const productPrice = document.createElement('p');
+                                        productPrice.textContent = `$${parseFloat(product.price).toFixed(2)}`;
+                
+                                        productElement.appendChild(productImage);
+                                        productElement.appendChild(productName);
+                                        productElement.appendChild(productDescription);
+                                        productElement.appendChild(productPrice);
+                                        productElement.onclick = () => {
+                                            window.location.href = `productdetail.html?product_id=${product.id}`;
+                                        };
+                                        productsContainer.appendChild(productElement);
+                                    });
+                                }
+                */
+                function getCategoryIdFromUrl() {
+                    const params = new URLSearchParams(window.location.search);
+                    return params.get('category_id');
+                }
+
+                async function main() {
+                    initializePage();
+                    const categoryId = getCategoryIdFromUrl();
+                    if (categoryId) {
+                        await fetchCategoryProducts(categoryId);
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', main);
+            </script>
+</body>
+
+</html> 

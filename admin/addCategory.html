@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Category</title>
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+    <header>
+        <h1>Add Category</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="add_category.html">Add Category</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <form id="add-category-form" enctype="multipart/form-data">
+            <label for="category-name">Category Name:</label>
+            <input type="text" id="category-name" name="category-name" required>
+
+            <label for="category-description">Category Description:</label>
+            <textarea id="category-description" name="category-description" required></textarea>
+
+            <label for="category-image">Category Image:</label>
+            <input type="file" id="category-image" name="category-image" accept="image/*" required>
+
+            <button type="submit">Add Category</button>
+        </form>
+        <div id="image-preview" style="margin-top: 20px;"></div>
+    </main>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('add-category-form');
+    const imageInput = document.getElementById('category-image');
+    const imagePreview = document.getElementById('image-preview');
+
+    imageInput.addEventListener('change', () => {
+        const file = imageInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Category Image" style="max-width: 200px; max-height: 200px;">`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.innerHTML = '';
+        }
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const formData = new FormData(form);
+        try {
+            const response = await fetch('../php/addCategory.php', {
+                method: 'POST',
+             
+                body: formData
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Category added successfully!');
+                form.reset();
+                imagePreview.innerHTML = '';
+            } else {
+                alert('Error adding category: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while adding the category.');
+        }
+    });
+});
+
+    </script>
+</body>
+</html>

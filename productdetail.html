@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Product Detail</h1>
+        <nav id="navbar">
+            <a href="index.html">Home</a>
+            <a href="cart.html">Cart</a>
+            <a href="about.html">About Us</a>
+            <a id="loginTab" href="login.html">Login</a>
+            <a id="signupTab" href="signup.html">Sign Up</a>
+            <a id="logoutTab" href="#" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Products</h2>
+        <section id="featured-product-details" class="featured-product-details"> </section>
+
+        <div id="add-to-cart-message"></div>
+    </main>
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('product_id');
+            await fetchProductDetail(productId);
+            initializePage();
+        });
+
+        async function addToCart(event) {
+            event.preventDefault();  // Prevent form submission
+            const productQuantity = document.getElementById('quantity').value;
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('product_id');
+
+            try {
+                const response = await fetch('php/addToCart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId: productId, quantity: productQuantity })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('Product added to cart successfully!');
+                } else {
+                    alert('Error adding product to cart: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error adding product to cart:', error);
+            }
+        }
+
+        function logout() {
+            document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = 'php/logout.php';
+        }
+
+        async function fetchProductDetail(productId) {
+            try {
+                const response = await fetch(`php/getProductDetail.php?product_id=${productId}`);
+                const product = await response.json();
+                displayProductDetail(product);
+            } catch (error) {
+                console.error('Error fetching product details:', error);
+            }
+        }
+
+        function displayProductDetail(product) {
+            const featuredProductDetailContainer = document.getElementById('featured-product-details');
+            featuredProductDetailContainer.innerHTML = '';
+            const productDetailContainer = document.createElement('div');
+            productDetailContainer.classList.add("product-details");
+
+            const productElementImage = document.createElement('div');
+            productElementImage.classList.add('product-detail-image');
+            const productImage = document.createElement('img');
+            productImage.alt = "none";
+            productImage.src = "product_images/" + product.image_url;
+            productElementImage.appendChild(productImage);
+            productDetailContainer.appendChild(productElementImage);
+
+            const productElementDetails = document.createElement('div');
+            productElementDetails.classList.add('product-detail');
+
+            const productName = document.createElement('p');
+            productName.textContent = product.name;
+            const productDescription = document.createElement('p');
+            productDescription.textContent = product.description;
+            const productPrice = document.createElement('p');
+            productPrice.textContent = `R${parseFloat(product.price).toFixed(2)}`;
+
+            const producDetailsCheckout = document.createElement('div');
+            producDetailsCheckout.innerHTML = `
+                <div>
+                    <form id="add-product" enctype="multipart/form-data">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1">
+                        <button type="submit">Add to Cart</button>
+                    </form>
+                </div>
+            `;
+
+            productElementDetails.appendChild(productName);
+            productElementDetails.appendChild(productDescription);
+            productElementDetails.appendChild(productPrice);
+            productElementDetails.appendChild(producDetailsCheckout);
+            productElementImage.onclick = () => {
+                window.location.href = `productdetail.html?product_id=${product.id}`;
+            };
+            productDetailContainer.appendChild(productElementDetails);
+            featuredProductDetailContainer.appendChild(productDetailContainer);
+
+            // Attach event listener to the form
+            document.getElementById('add-product').addEventListener('submit', addToCart);
+        }
+    </script>
+</body>
+
+</html>
